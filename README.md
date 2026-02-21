@@ -29,19 +29,19 @@
 **数据稀缺性评分 ($DSS$):**
 
 客户端数据的价值与其所持有类别的全局频率成反比。拥有“稀有”类别（例如医学影像中的罕见病）的客户端将被赋予更高的分数。客户端 $i$ 的 $DSS$ 定义为：
-$$DSS_i = \sum_{j=1}^{K} \left( 1 - \frac{N_j}{N_{total}} \right) \times \frac{n_{i,j}}{N_i}$$
+$DSS_i = \sum_{j=1}^{K} \left( 1 - \frac{N_j}{N_{total}} \right) \times \frac{n_{i,j}}{N_i}$
 其中 $K$ 是类别总数，$N_j$ 是全局类别 $j$ 的样本总数，$N_{total}$ 是所有客户端的样本总数，$n_{i,j}$ 是客户端 $i$ 上类别 $j$ 的样本数量，$N_i$ 是客户端 $i$ 上的样本总数。该公式奖励那些本地数据分布集中在全局稀缺类别上的客户端。
 
 **参与稳定性评分 ($PSS$):**
 
 为了确保知识的可靠性，我们偏好那些频繁且规律参与的客户端。$PSS$ 是基于过去 $T$ 轮的滑动窗口计算的：
-$$ PSS_i = \frac{\mathcal{F}_i}{T} \times (1 - CV_{interval})$$
+$PSS_i = \frac{\mathcal{F}_i}{T} \times (1 - CV_{interval})$
 其中 $\mathcal{F}_i$ 是客户端 $i$ 在过去 $T$ 轮中的参与频率（次数）。$CV_{interval}$ 是参与时间间隔的变异系数（标准差 / 均值）。较低的 $CV$ 表示参与模式更具可预测性和规律性。
 
 **综合评分 $CVS$:**
 
 最终评分是由超参数 $\alpha$ 和 $\beta$ 控制的加权和：
-$$CVS_i = \alpha \cdot DSS_i + \beta \cdot PSS_i$$
+$CVS_i = \alpha \cdot DSS_i + \beta \cdot PSS_i$
 通常，我们将 $\alpha = 0.7$ 和 $\beta = 0.3$，以便在考虑系统稳定性的同时优先考虑数据价值。
 
 ### 3. 🔄 带滞后的动态调整 (Dynamic Adjustment with Hysteresis)
@@ -66,7 +66,7 @@ $$CVS_i = \alpha \cdot DSS_i + \beta \cdot PSS_i$$
 | **层级权重 ($\gamma$)** | 1.5 (增强) | 1.0 (基准) | 0.5 (降低) |
 
 客户端的修正聚合权重 $W_i^{HAKP}$ 变为：
-$$W_i^{HAKP} = \gamma_{\text{layer}} \times (aw_{i} \cdot \epsilon_i + dw_{i})$$
+$W_i^{HAKP} = \gamma_{\text{layer}} \times (aw_{i} \cdot \epsilon_i + dw_{i})$
 
 这确保了“核心”知识几乎不衰减，并且对全局模型的贡献显著增加，即使这些客户端暂时不活跃，也能保留稀缺模式。
 
@@ -77,7 +77,7 @@ $$W_i^{HAKP} = \gamma_{\text{layer}} \times (aw_{i} \cdot \epsilon_i + dw_{i})$$
 **边缘层 (Edge Layer)** 的一个关键创新是引入知识原型以降低存储开销。对于低价值客户端，我们不再存储其完整的高维参数向量 $\theta_i$，而是将其知识压缩为一个轻量级的原型向量 $p_i$。
 
 原型 $p_i$ 代表了客户端特征空间的质心。它是通过对客户端本地数据集 $D_i$ 在其训练好的本地模型 $f(\cdot; \theta_i)$ 上提取的特征表示求平均来计算的：
-$$p_i = \frac{1}{N_i} \sum_{x \in D_i} f(x; \theta_i)$$
+$p_i = \frac{1}{N_i} \sum_{x \in D_i} f(x; \theta_i)$
 这个原型向量捕获了客户端数据分布的基本语义信息，而无需承担完整模型的存储成本。在生成式知识蒸馏过程中，这些原型作为生成器的正则化约束或调节输入，确保全局模型保留边缘客户端的基本信息，而无需为其分配大量存储资源。
 
 ### 6. 🚀 算法流程 (Algorithm Workflow)

@@ -4,11 +4,13 @@
 
 ## 📖 项目简介
 
-**DPFL Based On HAKP** (Dynamic Participation Federated Learning Based On Hierarchical Adaptive Knowledge Pool) 是一个面向动态参与环境的联邦学习框架。针对现有联邦学习中客户端动态参与（Dynamic Client Participation, DCP）导致的知识遗忘和模型性能波动问题，本项目在 **DPFL (Data-Free Pioneer Federated Learning)** 的基础上，创新性地提出了 **HAKP (分层自适应知识池)** 机制。
+**DPFL Based On HAKP** (Dynamic Participation Federated Learning Based On Hierarchical Adaptive Knowledge Pool) 是一个面向动态参与环境的联邦学习框架。针对现有联邦学习中客户端动态参与导致的知识遗忘和模型性能波动问题，本项目在 **DPFL** 的基础上，创新性地提出了 **HAKP (分层自适应知识池)** 机制。
 
 通过引入 **客户端价值评分 (Client Value Score, CVS)**，系统能够动态识别客户端的数据价值与参与稳定性，将其划分为 **核心层 (Core)**、**活跃层 (Active)** 和 **边缘层 (Edge)**，并对不同层级的客户端采用差异化的知识保留、衰减与聚合策略，从而在保证模型性能的同时显著降低存储开销并提升系统鲁棒性。
 
 ## 💡 核心创新点：分层自适应知识池 (HAKP)
+
+<img width="1408" height="768" alt="fig3" src="https://github.com/user-attachments/assets/41a7a942-a0f0-48d0-a421-bfc6719e0fe6" />
 
 ### 1. 🏗️ 层级定义 (Layer Definitions)
 
@@ -19,6 +21,9 @@
 *   **边缘层 (Edge Layer):** 由 $CVS$ 最低（例如后 20%）的客户端组成。这些客户端通常数据冗余或可用性极不稳定。
 
 ### 2. 📊 客户端价值评分 (CVS)
+
+<img width="1408" height="768" alt="fig4" src="https://github.com/user-attachments/assets/4408536d-1077-419d-b6ef-46de94f2f01e" />
+
 为了量化客户端价值，我们定义了 CVS 指标，它由两部分组成：
 
 **数据稀缺性评分 ($DSS$):**
@@ -50,6 +55,8 @@ $$CVS_i = \alpha \cdot DSS_i + \beta \cdot PSS_i$$
 
 ### 4. ⚙️ 差异化知识管理 (Differential Knowledge Management)
 
+<img width="1408" height="768" alt="fig5" src="https://github.com/user-attachments/assets/da36c7f4-daff-4b39-9cc1-6a15bc2bb5e8" />
+
 我们对每一层采用不同的策略，以平衡性能和效率：
 
 | 策略维度 | 核心层 (Core) | 活跃层 (Active) | 边缘层 (Edge) |
@@ -65,6 +72,8 @@ $$W_i^{HAKP} = \gamma_{\text{layer}} \times (aw_{i} \cdot \epsilon_i + dw_{i})$$
 
 ### 5. 🧩 知识原型 (Knowledge Prototypes)
 
+<img width="1408" height="768" alt="fig6" src="https://github.com/user-attachments/assets/2aeec7c2-dcf8-4a1f-9d59-34d58de3bc75" />
+
 **边缘层 (Edge Layer)** 的一个关键创新是引入知识原型以降低存储开销。对于低价值客户端，我们不再存储其完整的高维参数向量 $\theta_i$，而是将其知识压缩为一个轻量级的原型向量 $p_i$。
 
 原型 $p_i$ 代表了客户端特征空间的质心。它是通过对客户端本地数据集 $D_i$ 在其训练好的本地模型 $f(\cdot; \theta_i)$ 上提取的特征表示求平均来计算的：
@@ -72,6 +81,8 @@ $$p_i = \frac{1}{N_i} \sum_{x \in D_i} f(x; \theta_i)$$
 这个原型向量捕获了客户端数据分布的基本语义信息，而无需承担完整模型的存储成本。在生成式知识蒸馏过程中，这些原型作为生成器的正则化约束或调节输入，确保全局模型保留边缘客户端的基本信息，而无需为其分配大量存储资源。
 
 ### 6. 🚀 算法流程 (Algorithm Workflow)
+
+<img width="1408" height="768" alt="fig7" src="https://github.com/user-attachments/assets/bbac9a93-928e-4a3d-93df-765984e900e3" />
 
 HAKP 的整体训练过程如下：
 
